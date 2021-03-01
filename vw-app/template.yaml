@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  vw-app
+
+  Sample SAM Template for vw-app
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+# Functions
+  CrudFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    DependsOn: DynamoDBTable
+    Properties:
+      CodeUri: source/
+      Policies:
+      - Statement:
+        - Sid: DynamoDBCrudPermissions
+          Effect: Allow
+          Action:
+          - dynamodb:DeleteItem
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          Resource: 
+            Fn::Join:
+              - ':'
+              - - Fn::GetAtt:
+                    - DynamoDBTable
+                    - Arn
+      Handler: app.lambda_handler
+      Runtime: python3.8
+      Events:
+        Post:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /post
+            Method: post
+
+  S3DynamoBackup:
+    Type: AWS::Serverless::Function
+    DependsOn: DynamoDBTable
+    Properties:
+      CodeUri: source/
+      Handler: scheduler.lambda_handler
+      Runtime: python3.8
+      Events:
+        S3BackupEvent:
+          Type: Schedule
+          Properties:
+            Input: '"{\n  \"tableName\": \"Datastore\",\n  \"s3_bucket\": \"datastorebackup-vw\",\n  \"s3_object\": \"dynamoDbBackup\",\n  \"filename\": \"output.json\"\n}"'
+            Schedule: 'rate(7 days)'
+            Enabled: True 
+      Policies:
+        - Statement:
+          - Sid: BackupPermissionsDynamoDB
+            Effect: Allow
+            Action:
+            - dynamodb:CreateBackup
+            - dynamodb:DeleteBackup
+            - dynamodb:ListBackups
+            - dynamodb:Scan
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: 
+              Fn::Join:
+                - ':'
+                - - Fn::GetAtt:
+                      - DynamoDBTable
+                      - Arn
+          - Sid: BackupPermissionsS3
+            Effect: Allow
+            Action:
+            - s3:GetObject
+            - s3:GetObjectAcl
+            - s3:ListBucket
+            - s3:GetBucketLocation
+            - s3:GetObjectVersion
+            - s3:PutObject
+            - s3:PutObjectAcl
+            - s3:GetLifecycleConfiguration
+            - s3:PutLifecycleConfiguration
+            - s3:DeleteObject
+            Resource: 
+              - Fn::Join:
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref S3BackupBucket
+                  - '/*'
+
+#Infrastructure
+  S3BackupBucket:
+    Type: 'AWS::S3::Bucket'
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: datastorebackup-vw
+
+  DynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+          TableName: Datastore
+          StreamSpecification:
+              StreamViewType: NEW_AND_OLD_IMAGES
+          ProvisionedThroughput:
+              WriteCapacityUnits: 5
+              ReadCapacityUnits: 5
+          AttributeDefinitions:
+              - AttributeName: Id
+                AttributeType: S
+          KeySchema:
+              - KeyType: HASH
+                AttributeName: Id
+
+Outputs:
+  CrudFunctionApi:
+    Description: "API Gateway endpoint URL for Prod stage for Post function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/post/"
+
+  CrudFunction:
+    Description: "Post Lambda Function ARN"
+    Value: !GetAtt CrudFunction.Arn
+
+  S3DynamoBackupFunction:
+    Description: "Backup Lambda Function ARN"
+    Value: !GetAtt S3DynamoBackup.Arn
+    
+  CrudFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt CrudFunctionRole.Arn
+
+  S3DynamoBackupRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt S3DynamoBackup.Arn
