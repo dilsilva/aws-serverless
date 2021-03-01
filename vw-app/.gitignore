@@ -11,6 +11,9 @@
 .directory
 .vscode
 .vscode/*
+.aws-sam/
+.aws-sam/*
+../.DS_Store
 
 # Linux trash folder which might appear on any partition or disk
 .Trash-*

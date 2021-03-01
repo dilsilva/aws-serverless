@@ -8,7 +8,6 @@ TO DO
 Description for all resources
 Name for all resources
 template.yaml LINE 56: adjust dynamical input on Schedule function <<<
-Backup Object result with generated datatime (scheduler.py)
 
 documentate
 .sh script of creation and cleaning
@@ -44,3 +43,4 @@ References:
 https://v1.cicd.serverlessworkshops.io/
 https://docs.aws.amazon.com/index.html
 
+https://www.cyberark.com/what-is/least-privilege/#:~:text=The%20principle%20of%20least%20privilege%20(PoLP)%20refers%20to%20an%20information,perform%20his%2Fher%20job%20functions.&text=Least%20privilege%20enforcement%20ensures%20the,access%20needed%20%E2%80%93%20and%20nothing%20more.
