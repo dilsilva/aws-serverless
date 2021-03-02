@@ -57,11 +57,6 @@ Resources:
                 - '{  "tableName": "${tableName}",  "s3_bucket": "${bucketName}",  "s3_object": "dynamoDbBackup",  "filename": "output.json"}'
                 - tableName: !Ref DynamoDBTable
                   bucketName: !Ref S3BackupBucket
-              #'"{\n  \"tableName\": \"Datastore\",\n  \"s3_bucket\": \"datastorebackup-vw\",\n  \"s3_object\": \"dynamoDbBackup\",\n  \"filename\": \"output.json\"\n}"'
-                # tableName : !Ref DynamoDBTable
-                # s3_bucket : !Ref S3BackupBucket
-                # s3_object : "dynamoDbBackup"
-                # filename : "output.json"
             Schedule: 'rate(1 minute)'
             Enabled: True 
       Policies:

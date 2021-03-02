@@ -30,13 +30,6 @@ def lambda_handler(event, context):
     statusCode = 200
     statusMessage = 'Success'
 
-    print(event)
-    print(event["tableName"])
-    print(json.dumps(event["tableName"]))
-
-    print(type(event))
-    print(type(event["tableName"]))
-    print(type(json.dumps(event["tableName"])))
 
     tableName = event["tableName"]
     s3_bucket = event["s3_bucket"]
