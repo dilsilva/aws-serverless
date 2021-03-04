@@ -1,0 +1,39 @@
+variables:
+  S3_BUCKET: $S3_BUCKET_VALUE 
+    
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  image: public.ecr.aws/bitnami/aws-cli # or another arbitrary docker image
+  stage: build
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VALUE 
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VALUE 
+    AWS_DEFAULT_REGION: $AWS_REGION_VALUE 
+    S3_BUCKET: $S3_BUCKET_VALUE 
+  script:
+    - if aws s3 ls "s3://$S3_BUCKET" 2>&1 | grep -q 'NoSuchBucket' then echo "Bucket doesn't exists, creating bucket..." && aws s3 mb s3://$S3_BUCKET --region "$REGION" fi
+    - cd vw-app/
+    - sam build -u
+    
+test:
+  image: public.ecr.aws/aws/$some_image_with_aws_sam
+  stage: test
+  dependencies: #Inherit artifacts
+    - build
+  script:
+    - sam validate --profile personal --config-file samconfig.toml
+
+deploy:
+  image: public.ecr.aws/aws/$some_image_with_pip 
+  stage: deploy
+  dependencies: #Inherit artifacts
+    - build
+  before_script:
+    - pip3 install awscli --upgrade
+    - pip3 install aws-sam-cli --upgrade
+  script:
+    - sam deploy --capabilities CAPABILITY_IAM --template-file template.yaml --region "$REGION" --s3-bucket "$S3_BUCKET" --stack-name "$STACK_NAME" --config-file samconfig.toml

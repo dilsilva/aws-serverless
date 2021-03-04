@@ -277,6 +277,56 @@ Stack deleted successful
 
 After that, we can check using the AWS Console, for all the resources that were deployed and how they're running and interacting between each other.
 
+In order to test the endpoint you can use the following request template, remembering that the API expects the *"Id"* field in JSON.
+```curl --location --request POST 'https://iffc5w6cc3.execute-api.us-east-1.amazonaws.com/Prod/post/' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "Id": "60aaec9dd23a8fgdfwse76",
+    "index": 0,
+    "guid": "94ed85db-8adb-4a06-b76f-f1cc97fa331a",
+    "isActive": true,
+    "balance": "$1,683.36",
+    "picture": "http://placehold.it/32x32",
+    "age": 33,
+    "eyeColor": "green",
+    "name": "Susie Mcintyre",
+    "gender": "female",
+    "company": "NETILITY",
+    "email": "susiemcintyre@netility.com",
+    "phone": "+1 (941) 511-2865",
+    "address": "342 Pacific Street, Tolu, Oklahoma, 2766",
+    "about": "Aliqua fugiat pariatur eu nisi magna fugiat ex. Officia et commodo et dolor proident cillum proident do ut irure velit. Dolore amet tempor in veniam laborum anim officia esse consectetur non mollit aliqua. Anim nostrud velit eiusmod amet excepteur duis. Nulla eiusmod ea Lorem nostrud velit laboris.\r\n",
+    "registered": "2019-07-21T09:35:30 +03:00",
+    "latitude": -78.521836,
+    "longitude": -90.775528,
+    "tags": [
+        "esse",
+        "consectetur",
+        "Lorem",
+        "sunt",
+        "cupidatat",
+        "duis",
+        "aliquip"
+    ],
+    "friends": [
+        {
+            "id": 0,
+            "name": "Amparo Rowland"
+        },
+        {
+            "id": 1,
+            "name": "Roxanne Ford"
+        },
+        {
+            "id": 2,
+            "name": "Erma Gamble"
+        }
+    ],
+    "greeting": "Hello, Susie Mcintyre! You have 8 unread messages.",
+    "favoriteFruit": "banana"
+}'
+```
+
 All the configuration of the template.yaml file was designed to be fully dynamical, witouth the necessity of manual adjustments, and following the principle of least privilege. Implementing several concepts of **DevSecOps**.
 
 
