@@ -57,7 +57,7 @@ Resources:
                 - '{  "tableName": "${tableName}",  "s3_bucket": "${bucketName}",  "s3_object": "dynamoDbBackup",  "filename": "output.json"}'
                 - tableName: !Ref DynamoDBTable
                   bucketName: !Ref S3BackupBucket
-            Schedule: 'rate(1 minute)'
+            Schedule: 'rate(7 minute)'
             Enabled: True 
       Policies:
         - Statement:

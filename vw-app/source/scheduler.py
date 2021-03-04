@@ -5,8 +5,6 @@ import datetime
 
 
 def get_data(table_name, client):
-    """    Get data from DynamoDB    """
-
     results = []
     last_evaluated_key = None
     while True:
@@ -25,28 +23,31 @@ def get_data(table_name, client):
 
 
 def lambda_handler(event, context):
-    """    Export Dynamodb to s3 (JSON)    """
+    try:
+        statusCode = 200
+        statusMessage = 'Backup successfull'
 
-    statusCode = 200
-    statusMessage = 'Success'
 
+        tableName = event["tableName"]
+        s3_bucket = event["s3_bucket"]
+        s3_object = event["s3_object"]
+        filename = event["filename"]
 
-    tableName = event["tableName"]
-    s3_bucket = event["s3_bucket"]
-    s3_object = event["s3_object"]
-    filename = event["filename"]
+        # scan the dynamodb
 
-    # scan the dynamodb
+        dynamodb = boto3.resource('dynamodb')
+        table = dynamodb.Table(tableName)
 
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(tableName)
+        client = boto3.client('dynamodb')
+        data = get_data(tableName, client)
 
-    client = boto3.client('dynamodb')
-    data = get_data(tableName, client)
+        # export JSON to s3 bucket
 
-    # export JSON to s3 bucket
+        s3 = boto3.resource('s3')
+        s3.Object(s3_bucket, s3_object+ filename+  datetime.datetime.now().strftime('%Y%m%d%H%M%S')).put(Body=json.dumps(data))
 
-    s3 = boto3.resource('s3')
-    s3.Object(s3_bucket, s3_object+ filename+  datetime.datetime.now().strftime('%Y%m%d%H%M%S')).put(Body=json.dumps(data))
+        return {'statusCode': statusCode, 'status': statusMessage}
 
-    return {'statusCode': statusCode, 'status': statusMessage}
+    except botocore.exceptions.ClientError as error:
+            raise error
+

@@ -1,20 +1,23 @@
 import boto3
 import json
+import botocore
+import logging
 from decimal import Decimal
 
 def lambda_handler(event, context):
-    client = boto3.resource('dynamodb')
-    table = client.Table('Datastore')
+    try:    
+        client = boto3.resource('dynamodb')
+        table = client.Table('Datastore')
 
-    input = json.loads(event["body"], parse_float=Decimal)
-    table.put_item(Item=input)
+        input = json.loads(event["body"], parse_float=Decimal)
+        table.put_item(Item=input)
 
-    response = {
-        'statusCode': 200,
-        'headers': {'Content-Type': 'application/json'},
-        'body': json.dumps({
-            'message': 'Execution successfully!'})  
-    }
+        return {
+            'statusCode': 200,
+            'body': json.dumps({
+                'message': 'Execution successfully!'})  
+        }
 
-    return response
+    except botocore.exceptions.ClientError as error:
+            raise error
 
